@@ -1,6 +1,6 @@
 # keepalive-v2
 
-Adaptive Linux resource workload tester.
+Adaptive Linux resource monitoring and testing toolkit.
 
 Version: 2.0.0
 
@@ -11,10 +11,11 @@ Version: 2.0.0
 - Network traffic statistics
 - Local profile generation
 - Configurable test parameters
-- CPU compression and hashing benchmark module
+- CPU benchmark module
 - Network test module
 - systemd service support
 - Runtime logs and status files
+- Health check script
 
 ## Configuration
 
@@ -46,6 +47,12 @@ curl -fsSL https://raw.githubusercontent.com/zhangchedan000/keepalive-v2/main/in
 
 ```bash
 python3 /opt/keepalive-v2/keepalive.py --status
+```
+
+## Health Check
+
+```bash
+bash healthcheck.sh
 ```
 
 ## Service
