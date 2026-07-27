@@ -2,9 +2,13 @@
 set -e
 
 systemctl disable --now keepalive-v2 2>/dev/null || true
+
 rm -f /etc/systemd/system/keepalive-v2.service
 rm -rf /opt/keepalive-v2
 rm -rf /var/lib/keepalive-v2
-systemctl daemon-reload
+rm -rf /etc/keepalive-v2
 
-echo "keepalive-v2 removed"
+systemctl daemon-reload
+systemctl reset-failed keepalive-v2 2>/dev/null || true
+
+echo "keepalive-v2 removed completely"
