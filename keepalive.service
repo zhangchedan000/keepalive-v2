@@ -1,14 +1,16 @@
 [Unit]
-Description=Keepalive V2 Workload Tester
+Description=Keepalive V2 Linux Resource Tester
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
+WorkingDirectory=/opt/keepalive-v2
 ExecStart=/usr/bin/python3 /opt/keepalive-v2/keepalive.py
 Restart=always
 RestartSec=20
 Nice=10
+Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target
