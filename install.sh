@@ -22,6 +22,8 @@ mkdir -p $CONFIG
 
 curl -fsSL $BASE/keepalive.py -o $DIR/keepalive.py
 curl -fsSL $BASE/config_loader.py -o $DIR/config_loader.py
+curl -fsSL $BASE/hardware_profile.py -o $DIR/hardware_profile.py
+curl -fsSL $BASE/benchmark_profile.py -o $DIR/benchmark_profile.py
 curl -fsSL $BASE/healthcheck.sh -o $DIR/healthcheck.sh
 curl -fsSL $BASE/keepalive.service -o /etc/systemd/system/keepalive-v2.service
 
