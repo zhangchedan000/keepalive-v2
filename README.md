@@ -2,16 +2,39 @@
 
 Adaptive Linux resource workload tester.
 
+Version: 2.0.0
+
 ## Features
 
 - System CPU monitoring
 - Memory usage monitoring
 - Network traffic statistics
-- Per-machine profile generation
-- Randomized task intervals
-- CPU compression and hashing workload
+- Local profile generation
+- Configurable test parameters
+- CPU compression and hashing benchmark module
 - Network test module
 - systemd service support
+- Runtime logs and status files
+
+## Configuration
+
+Default configuration location:
+
+```text
+/etc/keepalive-v2/config.json
+```
+
+Example:
+
+```json
+{
+  "cpu_target": 20,
+  "memory_target": 25,
+  "network_test": true,
+  "log": true,
+  "cycle_days": 7
+}
+```
 
 ## Install
 
@@ -24,14 +47,6 @@ curl -fsSL https://raw.githubusercontent.com/zhangchedan000/keepalive-v2/main/in
 ```bash
 python3 /opt/keepalive-v2/keepalive.py --status
 ```
-
-Status includes:
-
-- machine profile
-- CPU usage
-- memory usage
-- network usage
-- last update time
 
 ## Service
 
