@@ -22,6 +22,7 @@ mkdir -p $CONFIG
 
 curl -fsSL $BASE/keepalive.py -o $DIR/keepalive.py
 curl -fsSL $BASE/config_loader.py -o $DIR/config_loader.py
+curl -fsSL $BASE/healthcheck.sh -o $DIR/healthcheck.sh
 curl -fsSL $BASE/keepalive.service -o /etc/systemd/system/keepalive-v2.service
 
 if [ ! -f $CONFIG/config.json ]; then
@@ -37,6 +38,7 @@ EOF
 fi
 
 chmod +x $DIR/keepalive.py
+chmod +x $DIR/healthcheck.sh
 
 systemctl daemon-reload
 systemctl enable keepalive-v2
@@ -47,3 +49,4 @@ VERSION=$(curl -fsSL $VERSION_FILE 2>/dev/null || echo unknown)
 echo "keepalive-v2 installed"
 echo "version: $VERSION"
 echo "status: python3 $DIR/keepalive.py --status"
+echo "health: bash $DIR/healthcheck.sh"
