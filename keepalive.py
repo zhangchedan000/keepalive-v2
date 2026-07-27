@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import os,json,time,random,hashlib,argparse,signal,gzip,urllib.request
 from pathlib import Path
-from datetime import datetime,date
+from datetime import datetime,date,timedelta
 
 STATE=Path('/var/lib/keepalive-v2')
 PROFILE=STATE/'profile.json'
 STATUS=STATE/'status.json'
 DATA=STATE/'data.json'
 STOP=False
+cache=[]
 
 
 def seed():
@@ -19,7 +20,7 @@ def load_profile():
     if PROFILE.exists():
         return json.loads(PROFILE.read_text())
     r=random.Random(seed())
-    p={'cpu_bias':r.uniform(.9,1.1),'memory_bias':r.uniform(.9,1.1),'network_bias':r.uniform(.7,1.3),'interval':r.uniform(.5,1.5)}
+    p={'cpu_bias':r.uniform(.9,1.1),'memory_bias':r.uniform(.9,1.1),'network_bias':r.uniform(.7,1.3),'interval':r.uniform(.5,1.5),'cache_mb':r.randint(128,512)}
     PROFILE.write_text(json.dumps(p,indent=2))
     return p
 
@@ -55,6 +56,17 @@ def cpu_task():
         hashlib.sha256(data).digest()
 
 
+def cache_task(target):
+    global cache
+    while len(cache)*8 < target:
+        try:
+            cache.append(bytearray(8*1024*1024))
+        except MemoryError:
+            break
+    if len(cache)>random.randint(20,70):
+        cache=cache[random.randint(1,5):]
+
+
 def download_task(size=1024*1024):
     try:
         url=f'https://speed.cloudflare.com/__down?bytes={size}'
@@ -82,15 +94,23 @@ def main():
         print(json.dumps(json.loads(STATUS.read_text()) if STATUS.exists() else p,indent=2))
         return
 
-    data={'start':date.today().isoformat(),'network_start':net_bytes()}
+    start_net=net_bytes()
+    cycle_start=date.today()
     rng=random.Random(seed())
 
     while not STOP:
+        if date.today() >= cycle_start+timedelta(days=7):
+            cycle_start=date.today()
+            start_net=net_bytes()
+
         cpu=os.getloadavg()[0]/max(1,os.cpu_count())*100
         mem=mem_percent()
 
         if cpu < 20*p['cpu_bias']:
             cpu_task()
+
+        if mem < 25*p['memory_bias']:
+            cache_task(p['cache_mb'])
 
         if rng.random()<0.15:
             download_task(rng.randint(512,3072)*1024)
@@ -99,11 +119,13 @@ def main():
             'profile':p,
             'cpu':round(cpu,2),
             'memory':round(mem,2),
-            'network_total_gb':round((net_bytes()-data['network_start'])/1024**3,3),
-            'cycle_days':7,
+            'cache_mb':len(cache)*8,
+            'network_total_gb':round((net_bytes()-start_net)/1024**3,3),
+            'cycle_start':str(cycle_start),
             'updated':datetime.now().isoformat()
         }
         STATUS.write_text(json.dumps(status,indent=2))
+        DATA.write_text(json.dumps(status,indent=2))
         time.sleep(rng.randint(20,60)*p['interval'])
 
 if __name__=='__main__':
