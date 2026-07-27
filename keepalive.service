@@ -1,0 +1,14 @@
+[Unit]
+Description=Keepalive V2 Workload Tester
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/keepalive-v2/keepalive.py
+Restart=always
+RestartSec=20
+Nice=10
+
+[Install]
+WantedBy=multi-user.target
