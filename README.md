@@ -2,26 +2,45 @@
 
 Adaptive Linux resource workload tester.
 
-Features:
-- Reads current system CPU, memory and network usage
-- Adds configurable test workload when needed
-- Per-machine local profile generation
-- CPU, memory and network test modules
+## Features
+
+- System CPU monitoring
+- Memory usage monitoring
+- Network traffic statistics
+- Per-machine profile generation
+- Randomized task intervals
+- CPU compression and hashing workload
+- Network test module
 - systemd service support
 
-Install:
+## Install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/zhangchedan000/keepalive-v2/main/install.sh | sudo bash
 ```
 
-Status:
+## Check Status
 
 ```bash
 python3 /opt/keepalive-v2/keepalive.py --status
 ```
 
-Uninstall:
+Status includes:
+
+- machine profile
+- CPU usage
+- memory usage
+- network usage
+- last update time
+
+## Service
+
+```bash
+systemctl status keepalive-v2
+journalctl -u keepalive-v2 -f
+```
+
+## Uninstall
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/zhangchedan000/keepalive-v2/main/uninstall.sh | sudo bash
