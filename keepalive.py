@@ -7,8 +7,20 @@ STATE=Path('/var/lib/keepalive-v2')
 PROFILE=STATE/'profile.json'
 STATUS=STATE/'status.json'
 DATA=STATE/'data.json'
+LOG=STATE/'keepalive.log'
 STOP=False
 cache=[]
+
+
+def log(msg):
+    STATE.mkdir(parents=True,exist_ok=True)
+    with open(LOG,'a') as f:
+        f.write(f'{datetime.now().isoformat()} {msg}\n')
+    try:
+        if LOG.stat().st_size > 1024*1024:
+            LOG.write_text('')
+    except:
+        pass
 
 
 def seed():
@@ -20,8 +32,15 @@ def load_profile():
     if PROFILE.exists():
         return json.loads(PROFILE.read_text())
     r=random.Random(seed())
-    p={'cpu_bias':r.uniform(.9,1.1),'memory_bias':r.uniform(.9,1.1),'network_bias':r.uniform(.7,1.3),'interval':r.uniform(.5,1.5),'cache_mb':r.randint(128,512)}
+    p={
+        'cpu_bias':round(r.uniform(.9,1.1),3),
+        'memory_bias':round(r.uniform(.9,1.1),3),
+        'network_bias':round(r.uniform(.7,1.3),3),
+        'interval':round(r.uniform(.5,1.5),3),
+        'cache_mb':r.randint(128,512)
+    }
     PROFILE.write_text(json.dumps(p,indent=2))
+    log('profile created')
     return p
 
 
@@ -56,24 +75,25 @@ def cpu_task():
         hashlib.sha256(data).digest()
 
 
-def cache_task(target):
+def cache_task(limit):
     global cache
-    while len(cache)*8 < target:
+    while len(cache)*8 < limit:
         try:
             cache.append(bytearray(8*1024*1024))
         except MemoryError:
             break
-    if len(cache)>random.randint(20,70):
-        cache=cache[random.randint(1,5):]
+    if len(cache)>80:
+        cache=cache[-40:]
 
 
-def download_task(size=1024*1024):
+def download_task(size):
     try:
         url=f'https://speed.cloudflare.com/__down?bytes={size}'
         with urllib.request.urlopen(url,timeout=20) as r:
             while r.read(65536):
                 pass
-    except:
+        log(f'network task {size} bytes')
+    except Exception:
         pass
 
 
@@ -97,11 +117,13 @@ def main():
     start_net=net_bytes()
     cycle_start=date.today()
     rng=random.Random(seed())
+    log('service started')
 
     while not STOP:
         if date.today() >= cycle_start+timedelta(days=7):
             cycle_start=date.today()
             start_net=net_bytes()
+            log('new cycle')
 
         cpu=os.getloadavg()[0]/max(1,os.cpu_count())*100
         mem=mem_percent()
@@ -127,6 +149,8 @@ def main():
         STATUS.write_text(json.dumps(status,indent=2))
         DATA.write_text(json.dumps(status,indent=2))
         time.sleep(rng.randint(20,60)*p['interval'])
+
+    log('service stopped')
 
 if __name__=='__main__':
     main()
