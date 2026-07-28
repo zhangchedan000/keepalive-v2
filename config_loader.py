@@ -7,7 +7,7 @@ from pathlib import Path
 CONFIG_PATH = Path('/etc/keepalive-v2/config.json')
 
 DEFAULT = {
-    'cpu_target': 20,
+    'cpu_target': 25,
     'memory_target': 25,
     'network_test': True,
     'log': True,
